@@ -24,7 +24,7 @@ function App() {
   const [isDeleteCardPopupOpen, setIsDeleteCardPopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState({});
   const [cardsList, setCardsList] = useState([]);
-  const [currentUser, setCurrentUser] = useState({ name: '', about: '' });
+  const [currentUser, setCurrentUser] = useState({ name: '', about: '', avatar: ''});
   const [deletedCard, setDeletedCard] = useState({});
   const [email, setEmail] = useState('');
   const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
@@ -118,22 +118,24 @@ function App() {
       .catch((err) => console.log(err))
   }
 
-  function handleUpdateAvatar(userAvatar) {
+  function handleUpdateAvatar(userAvatar, resetForm) {
     api.editUserAvatar(userAvatar)
       .then((data) => {
         setCurrentUser(data);
         closeAllPopups();
       })
       .catch((err) => console.log(err))
+      .finally(() => resetForm());
   }
 
-  function handleAddNewPlace(newCard) {
+  function handleAddNewPlace(newCard, resetForm) {
     api.addNewCard(newCard)
       .then((card) => {
         setCardsList([card, ...cardsList]);
         closeAllPopups();
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err))
+      .finally(() => resetForm());
   }
 
   return (

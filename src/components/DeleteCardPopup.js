@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 function DeleteCardPopup({ isOpen, onClose, onDeleteCard, deletedCard }) {
   const [buttonText, setButtonText] = useState('Да');
 
-  useEffect(() => setButtonText('Да'));
+  useEffect(() => setButtonText('Да'), []);
 
-  function submit(e) {
+  function handleSubmit(e) {
     e.preventDefault();
-    setButtonText('Удаление...')
+    setButtonText('Удаление...');
     onDeleteCard(deletedCard);
   }
 
@@ -19,9 +19,7 @@ function DeleteCardPopup({ isOpen, onClose, onDeleteCard, deletedCard }) {
       buttonText={buttonText}
       isOpen={isOpen}
       onClose={onClose}
-      submit={submit}
-      isValid
-    />
+      onSubmit={handleSubmit} />
   )
 }
 

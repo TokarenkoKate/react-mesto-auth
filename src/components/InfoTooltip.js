@@ -6,7 +6,7 @@ function InfoTooltip({ isOpen, onClose, registerSuccess }) {
     if (e.target.classList.contains('popup')) {
       onClose();
     }
-  }
+  };
 
   const escFunction = useCallback((event) => {
     if (event.key === "Escape") {

@@ -3,7 +3,7 @@ function ImagePopup({ card, isOpen, onClose }) {
     if (e.target.classList.contains('popup')) {
       onClose();
     }
-  }
+  };
 
   return (
     <div className={`popup popup_type_open-image ${isOpen ? 'popup_opened' : ''}`} onClick={handleOverlayClose}>

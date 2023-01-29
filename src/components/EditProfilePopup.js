@@ -1,43 +1,27 @@
 import { useState, useContext, useEffect } from 'react';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
-import { useForm } from 'react-hook-form';
+import { useFormWithValidation } from './../utils/form';
 import PopupWithForm from "./PopupWithForm";
-
-const formConfig = {
-  required: 'Поле не может быть пустым',
-  minLength: {
-    value: 3,
-    message: 'Минимум 3 символа'
-  },
-  maxLength: {
-    value: 200,
-    message: 'Максимум 200 символов'
-  }
-};
 
 function EditProfilePopup({ isOpen, onClose, onUpdateUser }) {
   const currentUser = useContext(CurrentUserContext);
   const [buttonText, setButtonText] = useState('Сохранить');
 
+  const { values, handleChange, errors, isValid, resetForm } = useFormWithValidation();
+
   useEffect(() => {
     setButtonText('Сохранить');
-  }, [isOpen]);
+    resetForm({name: currentUser.name, about: currentUser.about});
+  }, [currentUser, isOpen]);
 
-  const { 
-    register,
-    formState: { errors, isValid, isDirty },
-    handleSubmit} = useForm({ 
-      mode: 'onChange',
-      defaultValues: {
-        name: currentUser.name,
-        about: currentUser.about
-      }
-    });
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  const submit = (data) => {
     setButtonText('Загрузка...');
-    onUpdateUser(data);
-  }
+
+    const { name, about } = values;
+    onUpdateUser({ name, about });
+  };
 
   return (
     <PopupWithForm
@@ -46,31 +30,33 @@ function EditProfilePopup({ isOpen, onClose, onUpdateUser }) {
       buttonText={buttonText}
       isOpen={isOpen}
       onClose={onClose}
-      handleSubmit={handleSubmit}
-      submit={submit}
-      isValid={isValid}
-      isDirty={isDirty}>
+      onSubmit={handleSubmit}
+      isValid={isValid} >
       <input
         type="text"
-        className={`form__input ${!isValid && isDirty ? 'form__input_state_error' : ''}`}
+        className={`form__input ${!isValid ? 'form__input_state_error' : ''}`}
         name="name"
         id="name-input"
         placeholder="Введите имя:"
-        defaultValue={currentUser.name}
-        {...register('name', formConfig)}/>
+        onChange={handleChange}
+        value={values?.name || ''}
+        minLength={3}
+        required />
       <span className='form__input-error'>
-        {errors?.name?.message && errors?.name.message || ''}
+        {errors?.name && errors.name}
       </span>
       <input
         type="text"
-        className={`form__input ${!isValid && isDirty ? 'form__input_state_error' : ''}`}
+        className={`form__input ${!isValid ? 'form__input_state_error' : ''}`}
         name="about"
-        id="job-input"
+        id="about-input"
         placeholder="Введите информацию о себе:"
-        defaultValue={currentUser.about}
-        {...register('about', formConfig)} />
+        onChange={handleChange}
+        value={values?.about || ''}
+        minLength={3}
+        required />
       <span className="form__input-error">
-        {errors?.about?.message && errors?.about.message || ''}
+        {errors?.about && errors.about}
       </span>
     </PopupWithForm>
   )

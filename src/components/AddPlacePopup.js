@@ -1,25 +1,22 @@
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFormWithValidation } from './../utils/form';
 import PopupWithForm from './PopupWithForm';
 
 function AddPlacePopup({ isOpen, onClose, onAddNewPlace }) {
   const [buttonText, setButtonText] = useState('Создать');
 
-  const {
-    register,
-    formState: { errors, isValid },
-    handleSubmit,
-    reset } = useForm({ mode: 'onChange' });
+  const { values, handleChange, errors, isValid, resetForm } = useFormWithValidation();
 
   useEffect(() => {
-    setButtonText('Создать')
+    setButtonText('Создать');
   }, [isOpen]);
 
-  const submit = (data) => {
-    setButtonText('Загрузка...');
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-    onAddNewPlace(data);
-    reset();
+    setButtonText('Загрузка...');
+    const { name, link } = values;
+    onAddNewPlace({ name, link }, resetForm);
   };
 
   return (
@@ -29,8 +26,7 @@ function AddPlacePopup({ isOpen, onClose, onAddNewPlace }) {
       buttonText={buttonText}
       isOpen={isOpen}
       onClose={onClose}
-      handleSubmit={handleSubmit}
-      submit={submit}
+      onSubmit={handleSubmit}
       isValid={isValid} >
       <input
         type="text"
@@ -38,20 +34,12 @@ function AddPlacePopup({ isOpen, onClose, onAddNewPlace }) {
         name="name"
         id="place-name-input"
         placeholder="Название:"
-        {...register('name', {
-          required: 'Поле не может быть пустым',
-          minLength: {
-            value: 3,
-            message: 'Минимум 3 символа',
-          },
-          maxLength: {
-            value: 200,
-            message: 'Максимум 200 символов'
-          }
-        })}
-      />
+        value={values?.name || ''}
+        onChange={handleChange}
+        minLength={3}
+        required />
       <span className="form__input-error">
-        {errors?.name && errors.name.message || ''}
+        {errors?.name && errors.name}
       </span>
       <input
         type="url"
@@ -59,16 +47,11 @@ function AddPlacePopup({ isOpen, onClose, onAddNewPlace }) {
         name="link"
         id="link-input"
         placeholder="Ссылка на изображение:"
-        {...register('link', {
-          required: 'Поле не может быть пустым',
-          minLength: {
-            value: 3,
-            message: 'Минимум 3 символа'
-          }
-        })}
-      />
+        value={values?.link || ''}
+        onChange={handleChange}
+        required />
       <span className="form__input-error">
-        {errors?.link && errors.link.message || ''}
+        {errors?.link && errors.link}
       </span>
     </PopupWithForm>
   )

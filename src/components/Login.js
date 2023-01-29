@@ -1,88 +1,71 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useFormWithValidation } from './../utils/form';
 import * as auth from './../utils/auth';
 
 const Login = ({ handleLogin, setEmail }) => {
+  const {values, handleChange, errors, isValid, resetForm} = useFormWithValidation();
+
   const [buttonText, setButtonText] = useState('Войти');
 
   const navigate = useNavigate();
 
-  const {
-    register,
-    formState: {
-      errors, isValid, isDirty
-    },
-    handleSubmit,
-    reset
-  } = useForm({
-    mode: 'onChange',
-    defaultValues: {
-      email: '',
-      password: ''
-    }
-  });
-
-  const submit = (data) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     setButtonText('Загрузка...');
 
-    const { email, password } = data;
+    const { email, password } = values;
 
     auth.authorize(email, password)
       .then((res) => {
         if (res.token) {
           setEmail(email);
-          reset();
+          resetForm();
           handleLogin(true);
           navigate('/', { replace: true });
         }
       })
       .catch((err) => console.log(err))
-      .finally(() => setButtonText('Войти'));
+      .finally(() => {
+        setButtonText('Войти');
+        resetForm();
+      });
   };
 
   return (
     <div className='login'>
       <h2 className='login__title'>Вход</h2>
-      <form className='login__form' onSubmit={handleSubmit(submit)} >
+      <form className='login__form' onSubmit={handleSubmit} >
         <div className='login__inputs-container'>
           <input
             name='email'
             type='email'
-            className={`login__input ${!isValid && isDirty ? 'login__input_state_error' : ''}`}
+            className={`login__input ${errors?.email ? 'login__input_state_error' : ''}`}
             placeholder="Email"
-            {...register('email', {
-              required: 'Поле не может быть пустым',
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: 'Пожалуйста, укажите email'
-              }
-            })}
-            />
+            value={values?.email || ''}
+            onChange={handleChange} 
+            minLength={3}
+            required />
           <span className="login__input-error">
-            {errors?.email && errors.email.message || ''}
+            {errors?.email && errors.email}
           </span>
           <input
             name='password'
             type='password'
-            className={`login__input ${!isValid && isDirty ? 'login__input_state_error' : ''}`}
+            className={`login__input ${errors?.password ? 'login__input_state_error' : ''}`}
             placeholder='Пароль'
-            {...register('password', {
-              required: 'Поле не может быть пустым',
-              minLength: {
-                value: 3,
-                message: 'Минимум 3 символа'
-              }
-            })}
-          />
+            value={values?.password || ''}
+            onChange={handleChange} 
+            minLength={3}
+            required />
           <span className="login__input-error">
-            {errors?.password && errors.password.message || ''}
+            {errors?.password && errors.password}
           </span>
         </div>
-        <button 
-          type='submit' 
-          className={`login__button ${!isValid && isDirty ? 'login__button_disabled' : ''}`}
-          disabled={!isValid && isDirty} >
+        <button
+          type='submit'
+          className={`login__button ${!isValid ? 'login__button_disabled' : ''}`}
+          disabled={!isValid} >
           {buttonText}
         </button>
       </form>

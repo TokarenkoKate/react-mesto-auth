@@ -1,29 +1,21 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
 import * as auth from '../utils/auth';
+import { useFormWithValidation } from './../utils/form';
 
 const Register = ({ handleInfoTooltipOpen, setRegisterSuccess }) => {
-  const {
-    register,
-    formState: { errors, isValid, isDirty },
-    handleSubmit
-  } = useForm({ 
-    mode: 'onChange',
-    defaultValues: {
-      email: '',
-      password: ''
-    }
-  });
+  const {values, handleChange, errors, isValid, resetForm} = useFormWithValidation();
 
   const [buttonText, setButtonText] = useState('Зарегистрироваться');
 
   const navigate = useNavigate();
 
-  const submit = (data) => {        
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
     setButtonText('Загрузка...');
 
-    const { email, password } = data;
+    const { email, password } = values;
 
     auth.register(email, password)
       .then((res) => {
@@ -37,49 +29,46 @@ const Register = ({ handleInfoTooltipOpen, setRegisterSuccess }) => {
         }
       })
       .catch(err => console.log(err))
-      .finally(() => setButtonText('Зарегистрироваться'));
+      .finally(() => {
+        setButtonText('Зарегистрироваться');
+        resetForm();
+      });
   };
 
   return (
     <div className='register'>
       <h2 className='register__title'>Регистрация</h2>
-      <form className='register__form' onSubmit={handleSubmit(submit)}>
+      <form className='register__form' onSubmit={handleSubmit}>
         <div className='register__inputs-container'>
           <input
             name='email'
-            type='email' 
-            className={`register__input ${!isValid && isDirty ? 'register__input_state_error' : ''}`}
+            type='email'
+            className={`register__input ${errors?.email ? 'register__input_state_error' : ''}`}
             placeholder="Email"
-            {...register('email', {
-              required: 'Поле не может быть пустым',
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: 'Пожалуйста, укажите email'
-              }})
-            }/>
+            value={values?.email || ''}
+            onChange={handleChange}
+            required
+          />
           <span className="register__input-error">
-            {errors?.email ? errors.email.message : ''}
+            { errors?.email && errors.email }
           </span>
           <input
             name='password'
             type='password'
-            className={`register__input ${!isValid && isDirty ? 'register__input_state_error' : ''}`}
+            className={`register__input ${errors?.email ? 'register__input_state_error' : ''}`}
             placeholder='Пароль'
-            {...register('password', {
-              required: 'Поле не может быть пустым',
-              minLength: {
-                value: 3,
-                message: 'Минимум 3 символа'
-              }
-            })}/>
+            value={values?.password || ''}
+            onChange={handleChange} 
+            minLength={3}
+            required />
           <span className="register__input-error">
-            {errors?.password ? errors.password.message : ''}
+            { errors?.password && errors.password }
           </span>
         </div>
-        <button 
-          type='submit' 
-          className={`register__button ${!isValid && isDirty ? 'register__button_disabled' : ''}`}
-          disabled={!isValid && isDirty} >
+        <button
+          type='submit'
+          className={`register__button ${!isValid ? 'register__button_disabled' : ''}`}
+          disabled={!isValid} >
           {buttonText}
         </button>
       </form>

@@ -1,24 +1,23 @@
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFormWithValidation } from './../utils/form';
 import PopupWithForm from './PopupWithForm';
 
 function EditAvatarPopup({ isOpen, onClose, onUpdateAvatar }) {
   const [buttonText, setButtonText] = useState('Сохранить');
 
-  const {
-    register,
-    formState: { errors, isValid },
-    handleSubmit,
-    reset } = useForm({ mode: 'onChange' });
+  const { values, handleChange, errors, isValid, resetForm } = useFormWithValidation();
 
   useEffect(() => {
     setButtonText('Сохранить');
   }, [isOpen]);
 
-  const submit = (data) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
     setButtonText('Загрузка...');
-    onUpdateAvatar(data);
-    reset();
+    
+    const { avatar } = values;
+    onUpdateAvatar({ avatar }, resetForm );
   };
 
   return (
@@ -28,8 +27,7 @@ function EditAvatarPopup({ isOpen, onClose, onUpdateAvatar }) {
       buttonText={buttonText}
       isOpen={isOpen}
       onClose={onClose}
-      handleSubmit={handleSubmit}
-      submit={submit}
+      onSubmit={handleSubmit}
       isValid={isValid} >
       <input
         type="url"
@@ -37,11 +35,11 @@ function EditAvatarPopup({ isOpen, onClose, onUpdateAvatar }) {
         name="avatar"
         id="avatar-input"
         placeholder="Введите ссылку на новый аватар:"
-        {...register('avatar', {
-          required: 'Поле не может быть пустым'
-        })} />
+        value={values?.avatar || ''}
+        onChange={handleChange}
+        required />
       <span className="form__input-error">
-        {errors?.avatar && errors.avatar.message || ''}
+        {errors?.avatar && errors.avatar}
       </span>
     </PopupWithForm>
   )
