@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 function DeleteCardPopup({ isOpen, onClose, onDeleteCard, deletedCard }) {
   const [buttonText, setButtonText] = useState('Да');
 
-  useEffect(() => setButtonText('Да'), []);
+  useEffect(() => setButtonText('Да'), [isOpen]);
 
   function handleSubmit(e) {
     e.preventDefault();

@@ -9,6 +9,7 @@ function AddPlacePopup({ isOpen, onClose, onAddNewPlace }) {
 
   useEffect(() => {
     setButtonText('Создать');
+    resetForm();
   }, [isOpen]);
 
   const handleSubmit = (e) => {
@@ -16,7 +17,7 @@ function AddPlacePopup({ isOpen, onClose, onAddNewPlace }) {
 
     setButtonText('Загрузка...');
     const { name, link } = values;
-    onAddNewPlace({ name, link }, resetForm);
+    onAddNewPlace({ name, link });
   };
 
   return (

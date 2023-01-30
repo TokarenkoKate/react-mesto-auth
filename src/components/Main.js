@@ -3,6 +3,7 @@ import { CurrentUserContext } from '../contexts/CurrentUserContext';
 import Card from './Card';
 
 function Main({
+  isLoading,
   cardsList,
   onEditProfile,
   onAddPlace,
@@ -11,14 +12,16 @@ function Main({
   onCardLike,
   onCardDelete
 }) {
-  
+
   const currentUser = useContext(CurrentUserContext);
 
   return (
     <main className="main">
       <section className="profile">
         <div className="profile__image-wrapper" onClick={onEditAvatar}>
-          <img src={currentUser.avatar} alt="Аватар" className="profile__image" />
+          {isLoading ?
+            (<div className="spinner spinner_visible"><i></i></div>)
+            : (<img src={currentUser.avatar} alt="Аватар" className="profile__image" />)}
         </div>
         <div className="profile__info">
           <h1 className="profile__author">{currentUser.name}</h1>

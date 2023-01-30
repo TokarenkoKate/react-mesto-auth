@@ -9,6 +9,7 @@ function EditAvatarPopup({ isOpen, onClose, onUpdateAvatar }) {
 
   useEffect(() => {
     setButtonText('Сохранить');
+    resetForm();
   }, [isOpen]);
 
   const handleSubmit = (e) => {
@@ -17,7 +18,7 @@ function EditAvatarPopup({ isOpen, onClose, onUpdateAvatar }) {
     setButtonText('Загрузка...');
     
     const { avatar } = values;
-    onUpdateAvatar({ avatar }, resetForm );
+    onUpdateAvatar({ avatar } );
   };
 
   return (

@@ -24,24 +24,33 @@ function App() {
   const [isDeleteCardPopupOpen, setIsDeleteCardPopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState({});
   const [cardsList, setCardsList] = useState([]);
-  const [currentUser, setCurrentUser] = useState({ name: '', about: '', avatar: ''});
+  const [currentUser, setCurrentUser] = useState({ name: 'Загрузка...', about: 'Загрузка...', avatar: '' });
   const [deletedCard, setDeletedCard] = useState({});
   const [email, setEmail] = useState('');
   const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
   const [registerSuccess, setRegisterSuccess] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    Promise.all([api.getUserInfo(), api.getInitialCards()])
-      .then(([user, cards]) => {
-        handleTokenCheck();
-        setCurrentUser(user);
-        setCardsList(cards);
-      })
-      .catch(err => console.log(err.message))
-  }, []);
+    handleTokenCheck();
+  }, [])
+
+  useEffect(() => {
+    {
+      isLoggedIn &&
+        setIsLoading(true);
+      isLoggedIn &&  Promise.all([api.getUserInfo(), api.getInitialCards()])
+          .then(([user, cards]) => {
+            setCurrentUser(user);
+            setCardsList(cards);
+            setIsLoading(false);
+          })
+          .catch(err => console.log(err.message))
+    }
+  }, [isLoggedIn]);
 
   const handleTokenCheck = () => {
     const token = localStorage.getItem('token');
@@ -49,14 +58,41 @@ function App() {
       auth.tokenCheck(token)
         .then(({ data }) => {
           if (data) {
-            setLoggedIn(true);
+            setIsLoggedIn(true);
             setEmail(data.email);
             navigate('/', { replace: true });
           }
         })
         .catch((err) => console.log(err));
     }
+  };
+
+  const handleRegister = (email, password) => {
+    auth.register(email, password)
+      .then((res) => {
+        if (res) {
+          navigate('/signin', { replace: true })
+          setRegisterSuccess(true);
+          setIsInfoTooltipOpen(true);
+        } else {
+          setRegisterSuccess(false);
+          setIsInfoTooltipOpen(true);
+        }
+      })
+      .catch(err => console.log(err));
   }
+
+  const handleAuthorize = (email, password) => {
+    auth.authorize(email, password)
+      .then((res) => {
+        if (res.token) {
+          setEmail(email);
+          setIsLoggedIn(true);
+          navigate('/', { replace: true });
+        }
+      })
+      .catch((err) => console.log(err))
+  };
 
   function handleEditProfileClick() {
     setIsEditProfilePopupOpen(true);
@@ -104,9 +140,9 @@ function App() {
       .then(() => {
         setCardsList(cardsList.filter((currentCard) => currentCard._id !== card._id));
         closeAllPopups();
+        setDeletedCard({});
       })
-      .catch((err) => console.log(err))
-      .finally(() => setDeletedCard({}));
+      .catch((err) => console.log(err));
   }
 
   function handleUpdateUser(userData) {
@@ -118,37 +154,36 @@ function App() {
       .catch((err) => console.log(err))
   }
 
-  function handleUpdateAvatar(userAvatar, resetForm) {
+  function handleUpdateAvatar(userAvatar) {
     api.editUserAvatar(userAvatar)
       .then((data) => {
         setCurrentUser(data);
         closeAllPopups();
       })
-      .catch((err) => console.log(err))
-      .finally(() => resetForm());
+      .catch((err) => console.log(err));
   }
 
-  function handleAddNewPlace(newCard, resetForm) {
+  function handleAddNewPlace(newCard) {
     api.addNewCard(newCard)
       .then((card) => {
         setCardsList([card, ...cardsList]);
         closeAllPopups();
       })
-      .catch((err) => console.log(err))
-      .finally(() => resetForm());
+      .catch((err) => console.log(err));
   }
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className='page'>
         <div className='page__container'>
-          <Header email={email} handleLogin={setLoggedIn} setEmail={setEmail} />
+          <Header email={email} handleLogin={setIsLoggedIn} setEmail={setEmail} />
           <Routes>
-            <Route path='/signin' element={ <Login handleLogin={setLoggedIn} setEmail={setEmail} />} />
-            <Route path='/signup' element={ <Register handleInfoTooltipOpen={setIsInfoTooltipOpen} setRegisterSuccess={setRegisterSuccess} /> } />
+            <Route path='/signin' element={<Login handleAuthorize={handleAuthorize} />} />
+            <Route path='/signup' element={<Register handleRegister={handleRegister} />} />
             <Route path='/' element={
               <ProtectedRoute
-                loggedIn={loggedIn}
+                isLoading={isLoading}
+                isLoggedIn={isLoggedIn}
                 cardsList={cardsList}
                 setCardsList={setCardsList}
                 onEditProfile={handleEditProfileClick}
@@ -160,7 +195,7 @@ function App() {
                 element={Main} />
             } />
           </Routes>
-          { loggedIn && <Footer /> }
+          {isLoggedIn && <Footer />}
 
           <EditProfilePopup
             isOpen={isEditProfilePopupOpen}

@@ -1,9 +1,11 @@
 import logo from './../images/logo.svg';
 import { useState } from 'react';
-import { Routes, Route, useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 function Header({ email, handleLogin, setEmail }) {
   const navigate = useNavigate();
+
+  const location = useLocation();
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -21,42 +23,40 @@ function Header({ email, handleLogin, setEmail }) {
   return (
     <header className={`header ${menuOpen ? 'active' : ''}`}>
       <nav className='header__nav'>
-        <Routes>
-          <Route path='/signin' element={
-            <>
-              <a href="#" className="logo">
+        {location.pathname === '/signin' && 
+          (<>
+            <Link to='/' className='logo'>
+              <img src={logo} alt="Логотип" className="logo__image" />
+            </Link>
+            <Link to='/signup' className='header__link'>Регистрация</Link>
+          </>)
+        }
+        {location.pathname === '/signup' &&
+          (<>
+            <Link to='/' className='logo'>
+              <img src={logo} alt="Логотип" className="logo__image" />
+            </Link>
+            <Link to='/signin' className='header__link'>Войти</Link>
+          </>)
+        }
+        {location.pathname === '/' &&
+          (<div className='header__menu'>
+            <div className='header__burger-wrapper'>
+              <Link to='/' className='logo'>
                 <img src={logo} alt="Логотип" className="logo__image" />
-              </a>
-              <Link to='/signup' className='header__link'>Регистрация</Link>
-            </>
-          } />
-          <Route path='/signup' element={
-            <>
-              <a href="#" className="logo">
-                <img src={logo} alt="Логотип" className="logo__image" />
-              </a>
-              <Link to='/signin' className='header__link'>Войти</Link>
-            </>
-          } />
-          <Route path='/' element={
-            <div className='header__menu'>
-              <div className='header__burger-wrapper'>
-                <a href="#" className="logo">
-                  <img src={logo} alt="Логотип" className="logo__image" />
-                </a>
-                <div className='burger' onClick={toggleMenu}>
-                  <div className="burger__bar1"></div>
-                  <div className="burger__bar2"></div>
-                  <div className="burger__bar3"></div>
-                </div>
-              </div>
-              <div className='header__link-wrapper'>
-                <p className='header__email'>{email}</p>
-                <button className='header__button' onClick={signOut}>Выйти</button>
+              </Link>
+              <div className='burger' onClick={toggleMenu}>
+                <div className="burger__bar1"></div>
+                <div className="burger__bar2"></div>
+                <div className="burger__bar3"></div>
               </div>
             </div>
-          } />
-        </Routes>
+            <div className='header__link-wrapper'>
+              <p className='header__email'>{email}</p>
+              <button className='header__button' onClick={signOut}>Выйти</button>
+            </div>
+          </div>)
+        }
       </nav>
     </header>
   );

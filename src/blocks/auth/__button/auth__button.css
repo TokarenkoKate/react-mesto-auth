@@ -1,4 +1,4 @@
-.login__button {
+.auth__button {
   max-width: 100%;
   height: 50px;
   text-align: center;
@@ -14,12 +14,12 @@
   transition: 0.1s ease-in opacity;
 }
 
-.login__button:hover {
+.auth__button:hover {
   opacity: 0.85;
 }
 
 @media screen and (max-width: 582px) {
-  .login__button {
+  .auth__button {
     font-size: 16px;
   }
 }

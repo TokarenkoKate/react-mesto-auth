@@ -1,4 +1,4 @@
-.login__inputs-container {
+.auth__inputs-container {
     display: flex;
     flex-direction: column;
 }
