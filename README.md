@@ -20,5 +20,5 @@
 
 ---
 ## Для запуска проекта: 
-* npm init
+* npm install
 * npm start
